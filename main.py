@@ -29,12 +29,6 @@ def cargaU(arr):
     us.append("33xx33") 
     us.append("cliente") 
     arr.append(us)
-    us = []
-    us.append(10) 
-    us.append("1") 
-    us.append("2") 
-    us.append("administrador") 
-    arr.append(us)
     
 # Declaración de contadores de rubros, y de auxiliares para la validación de usuario.  
 intentos = 1
@@ -43,9 +37,6 @@ tdc = ""
 codu = 0
 locales = [[0, 0, 0, 0, 0, 0, "B"]]*50
 c = 0
-# ind = 0
-# perf = 0
-# com = 0   
 a = 0
    
 cargaU(USUARIOS)
@@ -257,6 +248,7 @@ def gestionDeLocales():
                     x = input("Si desea seguir cargando locales, escriba 'si': ").lower()
                     while x != 'si' and x != 'no':
                         x = input("Respuesta inválida, intente de nuevo: ").lower()
+                    separacion()
                         
                 print("Redirigiendo al menu principal...")
                 menuPrincipalAdmin()
@@ -319,12 +311,17 @@ def gestionDeLocales():
             case 'd': 
                 verlos = input("Desea ver los locales ya cargados? Si/No: ").lower()
                 while verlos != 'si' and verlos != 'no':
-                    verlos = input("Respuesta inválida, intente de nuevo: ").lower()                
-                locales = ordenadoC(locales, c, 1, 6) 
+                    verlos = input("Respuesta inválida, intente de nuevo: ").lower()
                 if verlos == "si":
-                    print("Todos los locales: ")
-                    for l in range(c):
-                        print(locales[l])
+                    if c == 0:
+                        print("Todavía no hay locales cargados...")
+                    else:
+                        separacion()
+                        print("Todos los locales: ")
+                        for l in range(c):
+                            print(locales[l])
+                separacion()              
+                locales = ordenadoC(locales, c, 1, 6) 
                 a = 0
                 for i in range(10):
                     print("+-+-+-+-+-+")
@@ -470,7 +467,7 @@ def validacion():
     separacion()
     global tdc, codU
     usuario_ingresado = input("Usuario: ") 
-    contrasena_ingresada = input('Contraseña: ')
+    contrasena_ingresada = getpass.getpass(prompt='Contraseña: ')
     auxU = False
     auxC = False
     aux = False
