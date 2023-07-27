@@ -245,9 +245,16 @@ def gestionDeLocales():
                         case "c":
                             rubro = "Gastronomía"
                     
-                    codD = int(input("Código de dueño de local: "))
-                    while codD not in duenos or codD == 0:
-                        codD = int(input("Codigo de dueño inexistente... Intente de nuevo: "))
+                    au = False
+                    while au == False:
+                        codD = input("Código de dueño de local: ")
+                        try:
+                            codD = int(codD)
+                        except:
+                            pass
+                        if codD in duenos and codD != 0:
+                            au = True
+
                     
                     locales[c] = [c+1, nombre, ubicacion, rubro, codD, "A"] 
                     separacion()
