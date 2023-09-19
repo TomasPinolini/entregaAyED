@@ -276,7 +276,7 @@ def gestionDeLocales():
                         if el == "si":
                             locales[m][5] = "A"                    
                     locales = ordenadoD(locales, c, 1, 6) 
-                    maxMinLocales(c)
+                    maxMinLocales(c-1)
                     x = input("Si desea seguir modificando locales, escriba 'si': ").lower()
                 print("Redirigiendo al menu principal...")
                 menuPrincipalAdmin()
@@ -309,17 +309,6 @@ def gestionDeLocales():
                 print("Redirigiendo al menu principal...")
                 menuPrincipalAdmin()
             case 'd': 
-                verlos = input("Desea ver los locales ya cargados? Si/No: ").lower()
-                while verlos != 'si' and verlos != 'no':
-                    verlos = input("Respuesta inválida, intente de nuevo: ").lower()
-                if verlos == "si":
-                    if c == 0:
-                        print("Todavía no hay locales cargados...")
-                    else:
-                        separacion()
-                        print("Todos los locales: ")
-                        for l in range(c):
-                            print(locales[l])
                 separacion()              
                 locales = ordenadoC(locales, c, 1, 6) 
                 a = 0
