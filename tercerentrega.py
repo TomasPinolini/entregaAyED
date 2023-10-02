@@ -2,8 +2,7 @@ import os
 import pickle
 import os.path
 import io
-
-segundoaux = 0
+import datetime
 
 class Usuario():
     def __init__(self):
@@ -21,32 +20,76 @@ class Local():
         self.rubro = ''
         self.estado = ''
         
+class Promocion():
+    def __init__(self):
+        self.id = 0
+        self.desc = ''
+        self.desde = ''
+        self.hasta = ''
+        self.diadesemana = ''
+        self.estado = ''
+        self.codD = 0
+        self.codLocal = 0
+
+class UsoPromo():
+    def __init__(self):
+        self.codCli = 0
+        self.codPromo = 0
+        self.hoy = ''
+
+class reporteUso():
+    def __init__(self):
+        self.id = 0
+        self.desc = ''
+        self.desde = ''
+        self.hasta = ''
+        self.diadesemana =''
+        self.estado = ''
+        self.cantUsos = 0
+
 auf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\USUARIOS.dat"
 alf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\LOCALES.dat"
+apf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\PROMOCIONES.dat"
+aupf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\USO.dat"
+aruf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\REPORTEUSO.dat"
 
 
-if not os.path.exists(auf):
-    aul = open(auf, 'w+b')
+if not os.path.exists(aupf):
+    aupl = open(aupf, 'w+b')
 else:
-    aul = open(auf, 'r+b')
+    aupl = open(aupf, 'r+b')
 
 if not os.path.exists(alf):
     all = open(alf, 'w+b')
 else:
     all = open(alf, 'r+b')
 
+if not os.path.exists(apf):
+    apl = open(apf, 'w+b')
+else:
+    apl = open(apf, 'r+b')
+
+if not os.path.exists(auf):
+    aul = open(auf, 'w+b')
+else:
+    aul = open(auf, 'r+b')
+
+if not os.path.exists(aruf):
+    arul = open(aruf, 'w+b')
+else:
+    arul = open(aruf, 'r+b')
+
 def primerMenu():
     print('------------------------------------------------------------------------------')
-    global segundoaux
     eleccionpm = -1
-    while eleccionpm != 3 and segundoaux == 0:
+    while eleccionpm != 3:
         print('''
         1- Ingresar como usuario registrado.
         2- Registrarse como cliente.
         3- Salir.
             ''')
         eleccionpm = input("Seleccione una número: ")
-        while valEntero(eleccionpm, 1, 6):
+        while valEntero(eleccionpm, 1, 14):
             print("Elección no válida.")
             eleccionpm = input("Seleccione una opción: ")
         eleccionpm = int(eleccionpm)
@@ -60,31 +103,34 @@ def primerMenu():
             case 5:
                 mostrarUs()
             case 6:
-                mapeoLocales()
+                mostrarPromos()
+            case 7: 
+                mostrarUsos()
                 
 def menuAdmin():
-        eleccionma = eleccionMA()
-        while eleccionma != 0:
-            match eleccionma:
-                case 0:
-                    print("Saliendo.")
-                    eleccionma = 0
-                case 1:
-                    print("Gestión de locales: ")
-                    gestionDeLocales()                    
-                case 2:
-                    crearCuentaD()
-                # case '3':
-                #     solDesc()
-                # case '4':
-                #     gestionDeNovedades()
-                # case '5':
-                #     reporteDesc()
-            
-            if eleccionma != 0:
-                eleccionma = eleccionMA()
+    eleccionma = eleccionMA()
+    while eleccionma != 0:
+        match eleccionma:
+            case 0:
+                print("Saliendo.")
+                eleccionma = 0
+            case 1:
+                print("Gestión de locales: ")
+                gestionDeLocales()                    
+            case 2:
+                crearCuentaD()
+            case 3:
+                aprobarDenegarD()
+            case 4:
+                print('Chapin!')
+                # gestionDeNovedades()
+            case 5:
+                x = reporteDesc()
+        
+        if eleccionma != 0:
+            eleccionma = eleccionMA()
  
-def menuDue():
+def menuDue(idd):
     eleccionD = eleccionDue()
     while eleccionD != 0:
         match eleccionD:
@@ -92,41 +138,50 @@ def menuDue():
                  print('Saliendo...')
                  eleccionD = 0
             case 1:
-                # crearDescuento()
-            # case 2:
-            #     reporteUsoDesc()    
-            # case 3:
+                x = 'S'
+                while x == 'S':
+                    crearPromocion(idd)
+                    mostrarPromos()
+                    x = input('Desea añadir otra promoción al listado? [S/N] >> ').upper()
+                    while x not in ['S', 'N']:
+                        x = input('Respuesta inválida, [S/N] >>').upper()
+                print("Redirigiendo al menu principal de dueños...")
+                eleccionD = 0
+            case 2:
+                reporteUsoDesc(idd)    
+            case 3:
+                print('Chapin!')
                 #verNovedades()
         if eleccionD != 0:
             eleccionD = eleccionDue()
             
-def menuC():
+def menuC(x):
     eleccionC = eleccionCl()
     while eleccionC != 0:
         match eleccionC:
             case 0:
                  print('Saliendo...')
                  eleccionC = 0
-            # case 1:
-                # buscarDesc()
-            # case 2:
-            #     solicitarDesc()    
-            # case 3:
+            case 1:
+                buscarDesc()
+            case 2:
+                solicitarDesc(x)    
+            case 3:
+                print("Chapín!")
                 #verNovedades()
         if eleccionC != 0:
             eleccionC = eleccionCl()
     
-      
 def registro():
     U = Usuario()
     ingresarDatos(U)
-    a, b = busqCli(U.usuario, U.clave)
+    a, b, cod = busqCli(U.usuario, U.clave, auf, aul)
     print(a)
     while a == 'T' or a == 'TT': 
         print('Usuario existente con los datos ingresados, intente de nuevo: ')
         mostrarUs()
         ingresarDatos(U)
-        a, b = busqCli(U.usuario, U.clave)
+        a, b, c = busqCli(U.usuario, U.clave, auf, aul)
         print(a, b)
     U.codigo = sacarUCod(aul)
     U.tipo = 'Cliente'
@@ -135,18 +190,17 @@ def registro():
     pickle.dump(U, aul)
     aul.flush()
     os.system("cls")
-    # mostrarUs()
   
 def crearCuentaD():
     U = Usuario()
     ingresarDatos(U)
-    a, b = busqCli(U.usuario, U.clave)
+    a, b, c = busqCli(U.usuario, U.clave, auf, aul)
     print(a)
     while a == 'T' or a == 'TT': 
         print('Usuario existente con los datos ingresados, intente de nuevo: ')
         mostrarUs()
         ingresarDatos(U)
-        a, b = busqCli(U.usuario, U.clave)
+        a, b, c = busqCli(U.usuario, U.clave, aul, auf)
         print(a, b)
     U.codigo = sacarUCod(aul)
     U.tipo = 'Dueno'
@@ -156,9 +210,79 @@ def crearCuentaD():
     aul.flush()
     os.system("cls")
 
-def ingreso():
-    global segundoaux
+def aprobarDenegarD():
+    mostrarPromosPend()
+    tamArc, tamReg, cantR = sacarCant(apf, apl)
+    cod = input('Código de promoción >> ')
+    while valEntero(cod, 0, 100000):
+        cod = input('Código inválida, intente de nuevo: ')
+    cod = int(cod)
+    if busqIDP(cod) != -1:
+        apl.seek(busqIDP(cod))
+        reg = pickle.load(apl)
+        if reg.estado.strip() == 'Pendiente':
+            estado = input('Aprobado/Rechazado? (1/2) >> ')
+            while valEntero(estado, 1, 2):
+                estado = input('Respuesta inválida, intente de nuevo: ')
+            estado = int(estado)
+            match estado:
+                case 1:
+                    estado = 'Aprobada'
+                case 2: 
+                    estado = 'Rechazada'
+            reg.estado = estado.ljust(9, ' ')
+            apl.seek(-tamReg, 1)
+            pickle.dump(reg, apl)
+            apl.flush()
+        else: print('Promoción ya evaluada: '+reg.estado.strip())
+    else:
+        print('No existe promoción con el código emitido.')
     
+def reporteDesc():
+    print('Desde: ')
+    desde = validarFecha()
+    print('Hasta: ')
+    hasta = validarFecha()   
+    while desde > hasta:
+        print('Fechas inválidas:')
+        print('Desde: ')
+        desde = validarFecha()
+        print('Hasta: ')
+        hasta = validarFecha()  
+    
+    if os.path.getsize(apf) > 0:
+        print('------------------------------------------------------------------------------------------------')
+        apl.seek(0)
+        encabezado = ''
+        encabezado += '{:<7}'.format('Id')
+        encabezado += '{:<35}'.format('Descripción')
+        encabezado += '{:<15}'.format('Desde')
+        encabezado += '{:<15}'.format('Hasta')
+        encabezado += '{:<12}'.format('Estado')
+        print(encabezado)
+        print('-----------------------------------------------------------------------------------------------')
+        while apl.tell() < os.path.getsize(apf):    
+            reg = pickle.load(apl)
+            anodesde, mesdesde, diadesde = reg.desde.split('-')
+            anohasta, meshasta, diahasta = reg.hasta.split('-')
+            anodesde, mesdesde, diadesde, anohasta, meshasta, diahasta = int(anodesde), int(mesdesde), int(diadesde), int(anohasta), int(meshasta), int(diahasta)
+            regdesde = datetime.date(anodesde, mesdesde, diadesde)
+            reghasta = datetime.date(anohasta, meshasta, diahasta)
+            if reg.estado.strip() == 'Aprobada' and desde >= regdesde and hasta <= reghasta:
+                salida = ''
+                salida += '{:<7}'.format(str(reg.id).strip())
+                salida += '{:<35}'.format(reg.desc.strip())
+                salida += '{:<15}'.format(reg.desde.strip())
+                salida += '{:<15}'.format(reg.hasta.strip())
+                salida += '{:<12}'.format(reg.estado.strip())
+                print(salida)
+                print('-----------------------------------------------------------------------------------------------')
+    else:
+        print('---------------------------------------------------------------------')
+        print('No hay promociones aprobadas ')
+        print('----------------------------------------------------------------------') 
+
+def ingreso():  
     usuario = input('Ingrese mail de usuario: ')
     while len(usuario) > 100:
         print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
@@ -171,42 +295,30 @@ def ingreso():
     usuario = usuario.ljust(100, ' ')
     clave = clave.ljust(8, ' ')
 
-    auxxx = 0
-    encontro, tipo = busqCli(usuario, clave)
+    auxxx = 1
+    encontro, tipo, id = busqCli(usuario, clave, auf, aul)
 
-    while auxxx < 3:
-        match encontro:
-            case 'T':
-                print('Ingreso exitoso.')
-                auxxx = 4
-            case 'TT': 
-                auxxx = auxxx + 1
-                clave = input('Clave de usuario incorrecta, intente de nuevo: ')            
-                while len(clave) > 8:
-                    print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
-                    clave = input('>>  ').ljust(8, ' ')
-                encontro, tipo = busqCli(usuario, clave)
-            case 'F':
-                auxxx = auxxx + 1
-                print('Mail y clave de usuario incorrectas: ')
-                usuario = input('>>   ').ljust(100, ' ')
-                while len(usuario) > 100:
-                    print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
-                    usuario = input('>>  ').ljust(100, ' ')
-                clave = input('>>   ').ljust(8, ' ')
-                while len(clave) > 8:
-                    print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
-                    clave = input('>>  ').ljust(8, ' ')    
-                encontro, tipo = busqCli(usuario, clave)
-        
-    if auxxx == 4:
-        match tipo:
-            # case 'Dueno':
-                # menuDue()
+    while auxxx < 3 and not encontro:
+        auxxx += 1
+        print('Datos no compatible: ')
+        usuario = input('>>   ').ljust(100, ' ')
+        clave = input('>>   ').ljust(8, ' ')
+        while len(usuario) > 100:
+            print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
+            usuario = input('>>  ').ljust(100, ' ')
+        while len(clave) > 8:
+            print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
+            clave = input('>>  ').ljust(8, ' ')    
+        encontro, tipo, id = busqCli(usuario, clave, auf, aul)
+                  
+    if encontro:
+        match tipo.strip():
+            case 'Dueno':
+                menuDue(id)
             case 'Administrador':
                 menuAdmin()
-            # case 'Cliente':
-            #     menuCli()    
+            case 'Cliente':
+                menuC(id)    
         
 def mapeoLocales():
     tamArc, tamReg, cantR = sacarCant(alf, all)
@@ -228,12 +340,12 @@ def gestionDeLocales():
     while elecciongdl != 'e':  
         match elecciongdl:
             case 'a':
-                x = 'si'
-                while x == 'si':
+                x = 'S'
+                while x == 'S':
                     crearLocal()
-                    x = input("Si desea seguir cargando locales, escriba 'si': ").lower()
-                    while x != 'si' and x != 'no':
-                        x = input("Respuesta inválida, intente de nuevo: ").lower()
+                    x = input("Si desea seguir cargando locales? [S/N] >> ").upper()
+                    while x not in ['S', 'N']:
+                        x = input("Respuesta inválida [S/N] ").upper()
                 print("Redirigiendo al menu principal de administradores...")
                 elecciongdl = 'e'
             case 'b':
@@ -278,7 +390,6 @@ def mostrarLocales():
         print('---------------------------------------------------------------------------------------------')
         while all.tell() < os.path.getsize(alf):    
             reg = pickle.load(all)
-            print(all.tell())
             salida = ''
             salida += '{:<10}'.format(str(reg.id).strip())
             salida += '{:<20}'.format(reg.nombre.strip())
@@ -291,13 +402,95 @@ def mostrarLocales():
         print('---------------------------------------------------------------------------------------------')
     else:
         print('---------------------------------------------------------------------')
-        print('Todavía no hay locales cargados: ')
+        print('Todavía no hay locales cargados ')
         print('----------------------------------------------------------------------')
-             
+            
+def mostrarPromos():
+    if os.path.getsize(apf) > 0:
+        print('-------------------------------------------------------------------------------------------------------------------------')
+        apl.seek(0)
+        encabezado = ''
+        encabezado += '{:<7}'.format('Id')
+        encabezado += '{:<35}'.format('Descripción')
+        encabezado += '{:<15}'.format('Desde')
+        encabezado += '{:<15}'.format('Hasta')
+        encabezado += '{:<12}'.format('Estado')
+        encabezado += '{:<18}'.format('Código de dueño')
+        encabezado += '{:<15}'.format('Código de local')
+        print(encabezado)
+        print('------------------------------------------------------------------------------------------------------------------------')
+        while apl.tell() < os.path.getsize(apf):    
+            reg = pickle.load(apl)
+            salida = ''
+            salida += '{:<7}'.format(str(reg.id).strip())
+            salida += '{:<35}'.format(reg.desc.strip())
+            salida += '{:<15}'.format(reg.desde.strip())
+            salida += '{:<15}'.format(reg.hasta.strip())
+            salida += '{:<12}'.format(reg.estado.strip())
+            salida += '{:<18}'.format(str(reg.codD))
+            salida += '{:<15}'.format(str(reg.codLocal))
+            print(salida)
+            
+        print('------------------------------------------------------------------------------------------------------------------------')
+    else:
+        print('-------------------------------------------------')
+        print('Todavía no hay promociones cargadas ')
+        print('-------------------------------------------------')
+ 
+def mostrarPromosPend():
+    if os.path.getsize(apf) > 0:
+        print('------------------------------------------------------------------------------------------------')
+        apl.seek(0)
+        encabezado = ''
+        encabezado += '{:<10}'.format('Id')
+        encabezado += '{:<35}'.format('Descripción')
+        encabezado += '{:<20}'.format('Desde')
+        encabezado += '{:<20}'.format('Hasta')
+        print(encabezado)
+        print('-----------------------------------------------------------------------------------------------')
+        while apl.tell() < os.path.getsize(apf):    
+            reg = pickle.load(apl)
+            if reg.estado == 'Pendiente'.strip():
+                salida = ''
+                salida += '{:<10}'.format(str(reg.id).strip())
+                salida += '{:<35}'.format(reg.desc.strip())
+                salida += '{:<20}'.format(reg.desde.strip())
+                salida += '{:<20}'.format(reg.hasta.strip())
+                print(salida)
+                print('-----------------------------------------------------------------------------------------------')
+    else:
+        print('---------------------------------------------------------------------')
+        print('No hay promociones pendietes ')
+        print('----------------------------------------------------------------------') 
+
+def mostrarUsos():
+    if os.path.getsize(aupf) > 0:
+        print('--------------------------------------------------------')
+        aupl.seek(0)
+        encabezado = ''
+        encabezado += '{:<20}'.format('Código Cliente')
+        encabezado += '{:<20}'.format('Codigo Promoción')
+        encabezado += '{:<25}'.format('Día')
+        print(encabezado)
+        print('--------------------------------------------------------')
+        while aupl.tell() < os.path.getsize(aupf):    
+            reg = pickle.load(aupl)
+            salida = ''
+            salida += '{:<20}'.format(reg.codCli)
+            salida += '{:<20}'.format(reg.codPromo)
+            salida += '{:<25}'.format(reg.hoy.strip())
+            print(salida)
+            
+        print('--------------------------------------------------------')
+    else:
+        print('---------------------------------------------------------------------')
+        print('Todavía no hay promociones utilizadas ')
+        print('----------------------------------------------------------------------')    
+
 def crearLocal():
     L = Local()
     ingresarDatosLocal(L)
-    L.id = sacarUId(all)
+    L.id = sacarUIdL()
     L.estado = 'A'
     all.seek(os.path.getsize(alf))
     formateoL(L)
@@ -306,6 +499,72 @@ def crearLocal():
     ordenarLocales()
     mostrarLocales()
 
+def crearPromocion(idd):
+    P = Promocion()
+    ingresarDatosPromo(P,idd)
+    P.id = sacarUIdP()
+    P.estado = 'Pendiente'
+    P.codD = idd
+    apl.seek(os.path.getsize(apf))
+    formateoP(P)
+    print(P.codLocal)
+    pickle.dump(P, apl)
+    apl.flush()
+
+def reporteUsoDesc(idd):
+    aupl.seek(0)
+    print('Desde: ')
+    desde = validarFecha()
+    print('Hasta: ')
+    hasta = validarFecha()   
+    while desde > hasta:
+        print('Fechas inválidas:')
+        print('Desde: ')
+        desde = validarFecha()
+        print('Hasta: ')
+        hasta = validarFecha()
+        
+    if os.path.getsize(apf) > 0:
+        all.seek(0)
+        while all.tell() < os.path.getsize(alf):
+            local = pickle.load(all)
+            if local.codigo == idd:
+                print()
+                print(local.nombre.capitalize().strip()+':') 
+                print('------------------------------------------------------------------')
+                encabezado = ''
+                encabezado += '{:<7}'.format('Id')
+                encabezado += '{:<35}'.format('Descripción')
+                encabezado += '{:<7}'.format('Cantidad Uso')
+                print(encabezado)
+                print('-----------------------------------------------------------------')  
+                apl.seek(0)         
+                while apl.tell() < os.path.getsize(apf):    
+                    promo = pickle.load(apl)
+                    anodesde, mesdesde, diadesde = promo.desde.split('-')
+                    anohasta, meshasta, diahasta = promo.hasta.split('-')
+                    anodesde, mesdesde, diadesde, anohasta, meshasta, diahasta = int(anodesde), int(mesdesde), int(diadesde), int(anohasta), int(meshasta), int(diahasta)
+                    promodesde = datetime.date(anodesde, mesdesde, diadesde)
+                    promohasta = datetime.date(anohasta, meshasta, diahasta)
+                    codigoL = int(promo.codLocal)
+                    if promo.estado.strip() == 'Aprobada' and desde >= promodesde and hasta <= promohasta and local.id == codigoL:
+                        cantUsos = 0
+                        aupl.seek(0)
+                        salida = ''
+                        salida += '{:<7}'.format(str(promo.id).strip())
+                        salida += '{:<35}'.format(promo.desc.strip())
+                        while aupl.tell() < os.path.getsize(aupf): 
+                            uso = pickle.load(aupl)
+                            if uso.codPromo == promo.id:
+                                cantUsos += 1
+                        salida += '{:<7}'.format(cantUsos)
+                        print(salida)
+                        print('-----------------------------------------------------------------')
+    else:
+        print('---------------------------------------------------------------------')
+        print('No hay promociones aprobadas ')
+        print('---------------------------------------------------------------------')   
+               
 def modificarLocal():
     cod = input('Código del local a modificar: ')
     while busqLC(cod) == -1:
@@ -409,12 +668,14 @@ def eliminarLocal():
         all.flush()
 
 def sacarCant(fis, log):
-    tamArc = os.path.getsize(fis)
-    log.seek(0)
-    pickle.load(log)
-    tamReg = log.tell()
-    cantR = tamArc // tamReg
-    return tamArc, tamReg, cantR
+    if os.path.getsize(fis) > 0:
+        tamArc = os.path.getsize(fis)
+        log.seek(0)
+        pickle.load(log)
+        tamReg = log.tell()
+        cantR = tamArc // tamReg
+        return tamArc, tamReg, cantR
+    return 0,0,0
 
 def sacarUCod(x):
     x.seek(0)
@@ -426,18 +687,43 @@ def sacarUCod(x):
             aux = False
     return int(reg.codigo) + 1 
 
-def sacarUId(x):
-    x.seek(0)
-    aux = True
-    if os.path.getsize(alf) > 0:    
-        while True and aux == True:
-            try:
-                reg = pickle.load(x)
-            except EOFError:
-                aux = False
-        return int(reg.id) + 1 
-    else: 
+def sacarUIdL():
+    if os.path.getsize(alf)>0:
+        all.seek(0)
+        comp = 0
+        tArc = os.path.getsize(alf)
+        while all.tell() < tArc:
+            reg = pickle.load(all)
+            if reg.id > comp:
+                comp = reg.id
+        return comp + 1
+    else:
         return 1
+
+def sacarUIdP():
+    if os.path.getsize(apf)>0:
+        apl.seek(0)
+        comp = 0
+        tArc = os.path.getsize(apf)
+        while apl.tell() < tArc:
+            reg = pickle.load(apl)
+            if reg.id > comp:
+                comp = reg.id
+        return comp + 1
+    else:
+        return 1
+
+def sacarLocales(idd):
+    tamArc, tamReg, cantR = sacarCant(alf, all)
+    all.seek(0)
+    r = ''
+    while all.tell() < tamArc:
+        local = pickle.load(all)
+        if local.codigo == idd:
+            if len(r) > 0:
+                r = r + ',' + str(local.id)
+            else: r = str(local.id)
+    return r
 
 def ingresarDatos(x):
     x.usuario = input('Ingrese mail de usuario: ')
@@ -489,22 +775,51 @@ def ingresarDatosLocal(x):
         x.codigo = input("Intente de nuevo: ")
           
     x.codigo = int(x.codigo)            
-                
-def busqCli(x,y):
-    tamArc = os.path.getsize(auf)
-    aul.seek(0)
-    aux = 'F'
+       
+def ingresarDatosPromo(x, y):
+    x.desc = input('Ingrese la descripción de la promoción a agregar: ')
+    print('Desde: ')
+    desde = validarFecha()
+    print('Hasta: ')
+    hasta = validarFecha()   
+    while desde > hasta or desde < datetime.date.today():
+        print('Fechas inválidas:')
+        print('Desde: ')
+        desde = validarFecha()
+        print('Hasta: ')
+        hasta = validarFecha()    
+    x.desde = str(desde)
+    x.hasta = str(hasta)
+    
+    dias = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+    for i in dias:
+        msj = str(i)+ '? 0: No, 1: Si >> '
+        conf = input(str(msj))
+        while valEntero(conf, 0, 1):
+            msjj = 'Respeusta inválida, '+msj
+            conf = input(msjj)
+        conf = int(conf)
+        x.diadesemana += str(conf)
+    
+    x.codLocal = input('Código del local al que será aplicada la promoción: ')
+    while valLC(x.codLocal, y) == -1:
+        x.codLocal = input('Código del local inexistente, intente de nuevo: ')
+    
+def busqCli(x,y, fis, log):
+    tamArc = os.path.getsize(fis)
+    log.seek(0)
+    aux = False
     z = ''
-    while aul.tell() < tamArc and aux == 'F':
-        reg = pickle.load(aul)
+    cod = 0
+    while log.tell() < tamArc and aux == False:
+        reg = pickle.load(log)
         if reg.usuario == x and reg.clave == y:
-            ## agregar redireccion a ingreso
             z = reg.tipo
-            aux = 'T'
+            aux = True
+            cod = reg.codigo
         elif reg.usuario == x:
             print('Usuario existente con este usuario.')
-            aux = 'TT'
-    return aux, z
+    return aux, z, cod
 
 def busqD(x):
     tamArc = os.path.getsize(auf)
@@ -533,14 +848,14 @@ def busqLN(x):
             if x < reg.nombre:
                 hasta = medio - 1
             else:
-                desde = hasta + 1
+                desde = medio + 1
             medio = (desde + hasta) // 2
             all.seek(medio*tamReg, 0)
             reg = pickle.load(all)
         if reg.nombre == x:
             return medio*tamReg
         else: return -1
-    else: return -1   
+    else: return -1     
 
 def busqLC(x):
     try:
@@ -556,6 +871,48 @@ def busqLC(x):
     except: 
        return aux
 
+def valLC(cod, idd):
+    try:
+        aux = -1
+        idd = int(idd)
+        cod = int(cod)
+        tamArc = os.path.getsize(alf)
+        all.seek(0)
+        while all.tell() < tamArc:
+            local = pickle.load(all)
+            if local.codigo == idd and cod == local.id:
+                aux = cod
+        return aux   
+    except: 
+       return aux
+
+def busqPC(x):
+    try:
+        aux = -1
+        x = int(x)
+        tamArc = os.path.getsize(apf)
+        apl.seek(0)
+        while apl.tell() < tamArc:
+            reg = pickle.load(apl)
+            if reg.id == x:
+                aux = apl.tell() 
+        return aux   
+    except: 
+       return aux
+
+def busqIDP(x):
+    try:
+        aux = -1
+        tamArc, tamReg, cantR = sacarCant(apf, apl)
+        apl.seek(0)
+        while apl.tell() < tamArc:
+            reg = pickle.load(apl)
+            if reg.id == x:
+                aux = apl.tell() - tamReg
+        return aux   
+    except: 
+       return aux
+
 def formateoU(x):
     x.usuario = x.usuario.ljust(100, ' ')
     x.clave = x.clave.ljust(8, ' ')
@@ -566,6 +923,13 @@ def formateoL(x):
     x.ubicacion = x.ubicacion.ljust(50, ' ')
     x.rubro = x.rubro.ljust(12, ' ')
     
+def formateoP(x):
+    x.desc = x.desc.ljust(50, ' ')
+    x.desde = x.desde.ljust(10, ' ')
+    x.hasta = x.hasta.ljust(10, ' ')
+    x.diadesemana = x.diadesemana.ljust(7, ' ')
+    x.estado = x.estado.ljust(9, ' ')
+           
 def valEntero(opc, desde, hasta): 
     try:
         int(opc)
@@ -575,6 +939,22 @@ def valEntero(opc, desde, hasta):
             return True
     except:
         return True
+
+def validarFecha():
+    ano = input('Año: ')
+    while valEntero(ano, 0, 2100):
+        ano = input('Inválido, intente de nuevo: ')
+    ano = int(ano)
+    mes = input('Mes: ')
+    while valEntero(mes, 1, 12):
+        mes = input('Inválido, intente de nuevo: ')
+    mes = int(mes)
+    dia = input('Día: ')
+    while valEntero(dia, 1, 31):
+        dia = input('Inválido, intente de nuevo: ')
+    dia = int(dia)
+    
+    return datetime.date(ano, mes, dia)
 
 def ordenarLocales():
     tamArc, tamReg, cantRegs = sacarCant(alf, all)
@@ -650,6 +1030,70 @@ def eleccionCl():
         eleccionC = input("Seleccione una opción: ")
     return int(eleccionC)
 
+def buscarDesc():
+    mostrarLocales()
+    cod = input('Código del local donde se usó la promoción: ')
+    while busqLC(cod) == -1 and valEntero(cod, 0, 1000):
+        cod = input('Promoción con tal código inexistente, intente de nuevo: ')
+    cod = int(cod)
+    fecha = validarFecha()
+    while fecha < datetime.date.today():
+        print('Debe ser la fecha de hoy o posterior.')
+        fecha = validarFecha()
+    wd = fecha.weekday()
+    tamArc, tamReg, cantR = sacarCant(apf, apl)
+    tamArcL, tamRegL, cantRL = sacarCant(alf, all)
+    all.seek(cod*tamRegL-tamRegL)
+    local = pickle.load(all)
+    duenoLocal = local.codigo
+    apl.seek(0)
+    encabezado = ''
+    encabezado += '{:<10}'.format('Id')
+    encabezado += '{:<35}'.format('Descripción')
+    encabezado += '{:<20}'.format('Desde')
+    encabezado += '{:<20}'.format('Hasta')
+    print(encabezado)
+    print('-----------------------------------------------------------------------------------------------')
+    while apl.tell() < tamArc:
+        promo = pickle.load(apl)
+        if promo.diadesemana[wd] == '1' and promo.estado.strip() == 'Aprobada' and promo.codD == duenoLocal:
+            salida = ''
+            salida += '{:<10}'.format(str(promo.id).strip())
+            salida += '{:<35}'.format(promo.desc.strip())
+            salida += '{:<20}'.format(promo.desde.strip())
+            salida += '{:<20}'.format(promo.hasta.strip())
+            print(salida)
+    
+def solicitarDesc(p):
+    mostrarPromos()
+    cod = input('Código de la promoción a utilizar: ')
+    while busqPC(cod) == -1:
+        cod = input('Promoción con tal código inexistente, intente de nuevo: ')
+    cod = int(cod)
+    tamArc, tamReg, cantR = sacarCant(apf, apl)
+    apl.seek(cod*tamReg-tamReg)
+    promo = pickle.load(apl)
+    anodesde, mesdesde, diadesde = promo.desde.split('-')
+    anohasta, meshasta, diahasta = promo.hasta.split('-')
+    anodesde, mesdesde, diadesde, anohasta, meshasta, diahasta = int(anodesde), int(mesdesde), int(diadesde), int(anohasta), int(meshasta), int(diahasta)
+    regdesde = datetime.date(anodesde, mesdesde, diadesde)
+    reghasta = datetime.date(anohasta, meshasta, diahasta)
+    hoy = datetime.date(2023, 12, 4)
+    if hoy >= regdesde and hoy <= reghasta and promo.estado.strip() == 'Aprobada':
+        Up = UsoPromo()
+        Up.codCli = p
+        Up.codPromo = promo.id
+        Up.hoy = str(hoy).ljust(10, ' ')
+        aupl.seek(os.path.getsize(aupf))
+        pickle.dump(Up, aupl)
+        aupl.flush()
+
+        print("Promoción '"+promo.desc.strip()+"' utilizada.")
+    elif hoy < regdesde or hoy > reghasta:
+        print('Promoción no disponible el día de hoy, disponible del '+str(regdesde)+' al '+str(reghasta)+'.')
+    elif promo.estado.strip() != 'Aprobada': 
+        print('Promoción no aprobada en el momento.')
+        
 if os.path.getsize(auf) == 0:
     U = Usuario()
     U.codigo = 1
@@ -669,6 +1113,15 @@ if os.path.getsize(auf) == 0:
     pickle.dump(U, aul)
     print('--------------------------')
     aul.flush()
+    
+    U = Usuario()
+    U.codigo = 3
+    U.usuario = '3'.ljust(100, ' ')
+    U.clave = '3'.ljust(8, ' ')
+    U.tipo = 'Dueno'.ljust(13, ' ')
+    pickle.dump(U, aul)
+    print('--------------------------')
+    aul.flush()
 
 
 primerMenu()
@@ -676,3 +1129,6 @@ primerMenu()
 print("Saliendo.........")
 all.close()
 aul.close()
+apl.close()
+aupl.close()
+arul.close()
