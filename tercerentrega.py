@@ -3,6 +3,7 @@ import pickle
 import os.path
 import io
 import datetime
+import getpass
 
 class Usuario():
     def __init__(self):
@@ -80,33 +81,36 @@ else:
     arul = open(aruf, 'r+b')
 
 def primerMenu():
-    print('------------------------------------------------------------------------------')
     eleccionpm = -1
     while eleccionpm != 3:
+        print('------------------------------------------------------------------------------')
         print('''
         1- Ingresar como usuario registrado.
         2- Registrarse como cliente.
         3- Salir.
             ''')
+        print('------------------------------------------------------------------------------')
         eleccionpm = input("Seleccione una número: ")
         while valEntero(eleccionpm, 1, 14):
             print("Elección no válida.")
             eleccionpm = input("Seleccione una opción: ")
         eleccionpm = int(eleccionpm)
+        print('------------------------------------------------------------------------------')
+        
         match eleccionpm:
             case 1:
-                ingreso()
+                ingreso()            
             case 2:
-                registro()
+                registro()            
             case 4:
-                mostrarLocales()
+                mostrarLocales()            
             case 5:
-                mostrarUs()
+                mostrarUs()            
             case 6:
                 mostrarPromos()
             case 7: 
                 mostrarUsos()
-                
+
 def menuAdmin():
     eleccionma = eleccionMA()
     while eleccionma != 0:
@@ -118,6 +122,7 @@ def menuAdmin():
                 print("Gestión de locales: ")
                 gestionDeLocales()                    
             case 2:
+                print('Creacion cuenta de dueño: ')
                 crearCuentaD()
             case 3:
                 aprobarDenegarD()
@@ -129,7 +134,8 @@ def menuAdmin():
         
         if eleccionma != 0:
             eleccionma = eleccionMA()
- 
+        os.system("cls")
+
 def menuDue(idd):
     eleccionD = eleccionDue()
     while eleccionD != 0:
@@ -154,7 +160,9 @@ def menuDue(idd):
                 #verNovedades()
         if eleccionD != 0:
             eleccionD = eleccionDue()
-            
+
+    os.system("cls")
+          
 def menuC(x):
     eleccionC = eleccionCl()
     while eleccionC != 0:
@@ -171,17 +179,19 @@ def menuC(x):
                 #verNovedades()
         if eleccionC != 0:
             eleccionC = eleccionCl()
+            
+    os.system("cls")
     
 def registro():
     U = Usuario()
     ingresarDatos(U)
-    a, b, cod = busqCli(U.usuario, U.clave, auf, aul)
+    a, b, cod = busqCli(U.usuario, U.clave, auf, aul, 'registro')
     print(a)
     while a == 'T' or a == 'TT': 
         print('Usuario existente con los datos ingresados, intente de nuevo: ')
         mostrarUs()
         ingresarDatos(U)
-        a, b, c = busqCli(U.usuario, U.clave, auf, aul)
+        a, b, c = busqCli(U.usuario, U.clave, auf, aul, 'registro')
         print(a, b)
     U.codigo = sacarUCod(aul)
     U.tipo = 'Cliente'
@@ -194,13 +204,13 @@ def registro():
 def crearCuentaD():
     U = Usuario()
     ingresarDatos(U)
-    a, b, c = busqCli(U.usuario, U.clave, auf, aul)
+    a, b, c = busqCli(U.usuario, U.clave, auf, aul, 'registro')
     print(a)
     while a == 'T' or a == 'TT': 
         print('Usuario existente con los datos ingresados, intente de nuevo: ')
         mostrarUs()
         ingresarDatos(U)
-        a, b, c = busqCli(U.usuario, U.clave, aul, auf)
+        a, b, c = busqCli(U.usuario, U.clave, aul, auf, 'registro')
         print(a, b)
     U.codigo = sacarUCod(aul)
     U.tipo = 'Dueno'
@@ -287,29 +297,30 @@ def ingreso():
     while len(usuario) > 100:
         print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
         usuario = input('>>  ')
-    clave = input('Ingrese clave de usuario: ')
+    clave = getpass.getpass(prompt='Ingrese clave de usuario: ')
     while len(clave) > 8:
         print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
-        clave = input('>>  ')
+        clave = getpass.getpass(prompt='Ingrese clave de usuario: ')
     
     usuario = usuario.ljust(100, ' ')
     clave = clave.ljust(8, ' ')
 
     auxxx = 1
-    encontro, tipo, id = busqCli(usuario, clave, auf, aul)
+    encontro, tipo, id = busqCli(usuario, clave, auf, aul, '-')
+    print('------------------------------------------------------------------------------')
 
     while auxxx < 3 and not encontro:
         auxxx += 1
         print('Datos no compatible: ')
-        usuario = input('>>   ').ljust(100, ' ')
-        clave = input('>>   ').ljust(8, ' ')
+        usuario = input('Ingrese usuario nuevamente:  ').ljust(100, ' ')
+        clave = getpass.getpass(prompt='Ingrese clave de usuario nuevamente: ').ljust(8, ' ')
         while len(usuario) > 100:
             print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
-            usuario = input('>>  ').ljust(100, ' ')
+            usuario = input('Ingrese usuario nuevamente:  ').ljust(100, ' ')
         while len(clave) > 8:
             print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
-            clave = input('>>  ').ljust(8, ' ')    
-        encontro, tipo, id = busqCli(usuario, clave, auf, aul)
+            clave = getpass.getpass(prompt='Ingrese clave de usuario nuevamente: ').ljust(8, ' ')    
+        encontro, tipo, id = busqCli(usuario, clave, auf, aul, '-')
                   
     if encontro:
         match tipo.strip():
@@ -318,24 +329,27 @@ def ingreso():
             case 'Administrador':
                 menuAdmin()
             case 'Cliente':
-                menuC(id)    
-        
+                menuC(id)  
+    
+    os.system("cls")
+           
 def mapeoLocales():
     tamArc, tamReg, cantR = sacarCant(alf, all)
-    locales = [0]*50
+    locales = ['0 ']*50
     for i in range(50):
         all.seek(0)
         for i in range(cantR):
             reg = pickle.load(all)
-            locales[i] = reg.id
+            locales[i] = str(reg.id).ljust(2,' ')
     a = 0
     for i in range(10):
-        print("+-+-+-+-+-+")
+        print("+--+--+--+--+--+")
         print("|"+str(locales[a])+"|"+str(locales[a+1])+"|"+str(locales[a+2])+"|"+str(locales[a+3])+"|"+str(locales[a+4])+"|")
         a = a + 5     
-    print("+-+-+-+-+-+")
+    print("+--+--+--+--+--+")
             
 def gestionDeLocales(): 
+    print('------------------------------------------------------------------------------')
     elecciongdl = eleccionGDL() 
     while elecciongdl != 'e':  
         match elecciongdl:
@@ -361,7 +375,8 @@ def gestionDeLocales():
                 elecciongdl = 'e'
         if elecciongdl != 'e':
             elecciongdl = eleccionGDL() 
-                
+    print('------------------------------------------------------------------------------')
+        
 def mostrarUs():
     print('----------------------------------------------------------------------')
     tamArc = os.path.getsize(auf)
@@ -730,11 +745,11 @@ def ingresarDatos(x):
     while len(x.usuario) > 100:
         print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
         x.usuario = input('>>  ')
-
-    x.clave = input('Ingrese clave de usuario: ')
+        
+    x.clave = getpass.getpass(prompt='Ingrese clave de usuario: ')
     while len(x.clave) > 8:
         print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
-        x.clave = input('>>  ')
+        x.clave = getpass.getpass(prompt='Ingrese clave de usuario: ')
         
     x.usuario = x.usuario.ljust(100, ' ')
     x.clave = x.clave.ljust(8, ' ')
@@ -803,9 +818,9 @@ def ingresarDatosPromo(x, y):
     
     x.codLocal = input('Código del local al que será aplicada la promoción: ')
     while valLC(x.codLocal, y) == -1:
-        x.codLocal = input('Código del local inexistente, intente de nuevo: ')
+        x.codLocal = input('Código del local inválido, intente de nuevo: ')
     
-def busqCli(x,y, fis, log):
+def busqCli(x,y, fis, log, modo):
     tamArc = os.path.getsize(fis)
     log.seek(0)
     aux = False
@@ -817,7 +832,7 @@ def busqCli(x,y, fis, log):
             z = reg.tipo
             aux = True
             cod = reg.codigo
-        elif reg.usuario == x:
+        elif reg.usuario == x and modo == 'registro':
             print('Usuario existente con este usuario.')
     return aux, z, cod
 
@@ -880,7 +895,7 @@ def valLC(cod, idd):
         all.seek(0)
         while all.tell() < tamArc:
             local = pickle.load(all)
-            if local.codigo == idd and cod == local.id:
+            if local.codigo == idd and cod == local.id and local.estado == 'A':
                 aux = cod
         return aux   
     except: 
@@ -1102,7 +1117,6 @@ if os.path.getsize(auf) == 0:
     U.tipo = 'Administrador'
     aul.seek(0)
     pickle.dump(U, aul)
-    print('--------------------------')
     aul.flush()
     
     U = Usuario()
@@ -1111,7 +1125,6 @@ if os.path.getsize(auf) == 0:
     U.clave = '2'.ljust(8, ' ')
     U.tipo = 'Dueno'.ljust(13, ' ')
     pickle.dump(U, aul)
-    print('--------------------------')
     aul.flush()
     
     U = Usuario()
@@ -1120,13 +1133,15 @@ if os.path.getsize(auf) == 0:
     U.clave = '3'.ljust(8, ' ')
     U.tipo = 'Dueno'.ljust(13, ' ')
     pickle.dump(U, aul)
-    print('--------------------------')
     aul.flush()
 
 
 primerMenu()
 
 print("Saliendo.........")
+
+print('------------------------------------------------------------------------------')
+
 all.close()
 aul.close()
 apl.close()

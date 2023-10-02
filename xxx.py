@@ -1,2 +1,0 @@
-p = 'daasdsaas'
-print([*p])
