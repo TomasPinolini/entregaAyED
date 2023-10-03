@@ -83,6 +83,7 @@ else:
 def primerMenu():
     eleccionpm = -1
     while eleccionpm != 3:
+        os.system('cls')
         print('------------------------------------------------------------------------------')
         print('''
         1- Ingresar como usuario registrado.
@@ -91,8 +92,16 @@ def primerMenu():
             ''')
         print('------------------------------------------------------------------------------')
         eleccionpm = input("Seleccione una número: ")
-        while valEntero(eleccionpm, 1, 14):
+        while valEntero(eleccionpm, 1, 3):
+            os.system('cls')
             print("Elección no válida.")
+            print('------------------------------------------------------------------------------')
+            print('''
+            1- Ingresar como usuario registrado.
+            2- Registrarse como cliente.
+            3- Salir.
+                ''')
+            print('------------------------------------------------------------------------------')
             eleccionpm = input("Seleccione una opción: ")
         eleccionpm = int(eleccionpm)
         print('------------------------------------------------------------------------------')
@@ -102,14 +111,7 @@ def primerMenu():
                 ingreso()            
             case 2:
                 registro()            
-            case 4:
-                mostrarLocales()            
-            case 5:
-                mostrarUs()            
-            case 6:
-                mostrarPromos()
-            case 7: 
-                mostrarUsos()
+
 
 def menuAdmin():
     eleccionma = eleccionMA()
@@ -957,7 +959,7 @@ def valEntero(opc, desde, hasta):
 
 def validarFecha():
     ano = input('Año: ')
-    while valEntero(ano, 0, 2100):
+    while valEntero(ano, 2023, 2100):
         ano = input('Inválido, intente de nuevo: ')
     ano = int(ano)
     mes = input('Mes: ')
@@ -1093,7 +1095,7 @@ def solicitarDesc(p):
     anodesde, mesdesde, diadesde, anohasta, meshasta, diahasta = int(anodesde), int(mesdesde), int(diadesde), int(anohasta), int(meshasta), int(diahasta)
     regdesde = datetime.date(anodesde, mesdesde, diadesde)
     reghasta = datetime.date(anohasta, meshasta, diahasta)
-    hoy = datetime.date(2023, 12, 4)
+    hoy = datetime.today()
     if hoy >= regdesde and hoy <= reghasta and promo.estado.strip() == 'Aprobada':
         Up = UsoPromo()
         Up.codCli = p
@@ -1137,9 +1139,9 @@ if os.path.getsize(auf) == 0:
 
 
 primerMenu()
-
-print("Saliendo.........")
-
+os.system('cls')
+print('------------------------------------------------------------------------------')
+print("Saliendo...")
 print('------------------------------------------------------------------------------')
 
 all.close()
