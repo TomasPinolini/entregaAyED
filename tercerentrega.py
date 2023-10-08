@@ -4,6 +4,8 @@ import os.path
 import io
 import datetime
 import getpass
+import re
+
 
 class Usuario():
     def __init__(self):
@@ -83,7 +85,7 @@ else:
 def primerMenu():
     eleccionpm = -1
     while eleccionpm != 3:
-        os.system('cls')
+        # os.system('cls')
         print('------------------------------------------------------------------------------')
         print('''
         1- Ingresar como usuario registrado.
@@ -92,7 +94,7 @@ def primerMenu():
             ''')
         print('------------------------------------------------------------------------------')
         eleccionpm = input("Seleccione una número: ")
-        while valEntero(eleccionpm, 1, 3):
+        while valEntero(eleccionpm, 1, 7):
             os.system('cls')
             print("Elección no válida.")
             print('------------------------------------------------------------------------------')
@@ -111,7 +113,14 @@ def primerMenu():
                 ingreso()            
             case 2:
                 registro()            
-
+            case 4:
+                mostrarUs()
+            case 5:
+                mostrarLocales()
+            case 6:
+                mostrarPromos()
+            case 7:
+                mostrarUsos()
 
 def menuAdmin():
     eleccionma = eleccionMA()
@@ -146,15 +155,10 @@ def menuDue(idd):
                  print('Saliendo...')
                  eleccionD = 0
             case 1:
-                x = 'S'
-                while x == 'S':
-                    crearPromocion(idd)
-                    mostrarPromos()
-                    x = input('Desea añadir otra promoción al listado? [S/N] >> ').upper()
-                    while x not in ['S', 'N']:
-                        x = input('Respuesta inválida, [S/N] >>').upper()
+                creo = 0
+                crearPromocion(idd, creo)
+                if creo > 0: mostrarPromos()
                 print("Redirigiendo al menu principal de dueños...")
-                eleccionD = 0
             case 2:
                 reporteUsoDesc(idd)    
             case 3:
@@ -185,22 +189,25 @@ def menuC(x):
     os.system("cls")
     
 def registro():
+    salir = False
     U = Usuario()
+    print("Registro de cliente: (ingrese '*' en cualquier campo para salir)")    
     ingresarDatos(U)
-    a, b, cod = busqCli(U.usuario, U.clave, auf, aul, 'registro')
-    print(a)
-    while a == 'T' or a == 'TT': 
-        print('Usuario existente con los datos ingresados, intente de nuevo: ')
-        mostrarUs()
-        ingresarDatos(U)
-        a, b, c = busqCli(U.usuario, U.clave, auf, aul, 'registro')
-        print(a, b)
-    U.codigo = sacarUCod(aul)
-    U.tipo = 'Cliente'
-    aul.seek(os.path.getsize(auf))
-    formateoU(U)
-    pickle.dump(U, aul)
-    aul.flush()
+    if not salir:
+        a, b, cod = busqCli(U.usuario, U.clave, auf, aul, 'registro')
+        print(a)
+        while a == 'T' or a == 'TT': 
+            print('Usuario existente con los datos ingresados, intente de nuevo: ')
+            mostrarUs()
+            ingresarDatos(U)
+            a, b, c = busqCli(U.usuario, U.clave, auf, aul, 'registro')
+            print(a, b)
+        U.codigo = sacarUCod(aul)
+        U.tipo = 'Cliente'
+        aul.seek(os.path.getsize(auf))
+        formateoU(U)
+        pickle.dump(U, aul)
+        aul.flush()
     os.system("cls")
   
 def crearCuentaD():
@@ -230,7 +237,9 @@ def aprobarDenegarD():
         cod = input('Código inválida, intente de nuevo: ')
     cod = int(cod)
     if busqIDP(cod) != -1:
+        print(busqIDP(cod))
         apl.seek(busqIDP(cod))
+        print(apl.tell())
         reg = pickle.load(apl)
         if reg.estado.strip() == 'Pendiente':
             estado = input('Aprobado/Rechazado? (1/2) >> ')
@@ -295,60 +304,92 @@ def reporteDesc():
         print('----------------------------------------------------------------------') 
 
 def ingreso():  
+    print("Ingreso de usuario: (ingrese '*' en cualquier campo para salir)")    
     usuario = input('Ingrese mail de usuario: ')
     while len(usuario) > 100:
         print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
         usuario = input('>>  ')
+    
+    while valMail(usuario) and usuario != '*':
+        print('Debe de ser una dirección de email. Ingrese de nuevo: ')
+        usuario = input('>>  ')
+    
     clave = getpass.getpass(prompt='Ingrese clave de usuario: ')
     while len(clave) > 8:
         print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
         clave = getpass.getpass(prompt='Ingrese clave de usuario: ')
+        
     
-    usuario = usuario.ljust(100, ' ')
-    clave = clave.ljust(8, ' ')
+    if usuario != '*' and clave != '*':
+        usuario = usuario.ljust(100, ' ')
+        clave = clave.ljust(8, ' ')
 
-    auxxx = 1
-    encontro, tipo, id = busqCli(usuario, clave, auf, aul, '-')
-    print('------------------------------------------------------------------------------')
-
-    while auxxx < 3 and not encontro:
-        auxxx += 1
-        print('Datos no compatible: ')
-        usuario = input('Ingrese usuario nuevamente:  ').ljust(100, ' ')
-        clave = getpass.getpass(prompt='Ingrese clave de usuario nuevamente: ').ljust(8, ' ')
-        while len(usuario) > 100:
-            print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
-            usuario = input('Ingrese usuario nuevamente:  ').ljust(100, ' ')
-        while len(clave) > 8:
-            print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
-            clave = getpass.getpass(prompt='Ingrese clave de usuario nuevamente: ').ljust(8, ' ')    
+        auxxx = 1
         encontro, tipo, id = busqCli(usuario, clave, auf, aul, '-')
-                  
-    if encontro:
-        match tipo.strip():
-            case 'Dueno':
-                menuDue(id)
-            case 'Administrador':
-                menuAdmin()
-            case 'Cliente':
-                menuC(id)  
-    
+        print('------------------------------------------------------------------------------')
+
+        while auxxx < 3 and not encontro:
+            auxxx += 1
+            print('Datos no compatible: ')
+            usuario = input('Ingrese usuario nuevamente:  ').ljust(100, ' ')
+            clave = getpass.getpass(prompt='Ingrese clave de usuario nuevamente: ').ljust(8, ' ')
+            while len(usuario) > 100:
+                print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
+                usuario = input('Ingrese usuario nuevamente:  ').ljust(100, ' ')
+            while len(clave) > 8:
+                print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
+                clave = getpass.getpass(prompt='Ingrese clave de usuario nuevamente: ').ljust(8, ' ')    
+            encontro, tipo, id = busqCli(usuario, clave, auf, aul, '-')
+                    
+        if encontro:
+            match tipo.strip():
+                case 'Dueno':
+                    menuDue(id)
+                case 'Administrador':
+                    menuAdmin()
+                case 'Cliente':
+                    menuC(id)  
+        
     os.system("cls")
            
 def mapeoLocales():
     tamArc, tamReg, cantR = sacarCant(alf, all)
-    locales = ['0 ']*50
-    for i in range(50):
-        all.seek(0)
-        for i in range(cantR):
-            reg = pickle.load(all)
-            locales[i] = str(reg.id).ljust(2,' ')
-    a = 0
-    for i in range(10):
+    color_rojo = "\033[91m"
+    reset_color = "\033[0m"
+    locales = [[['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]],
+               [['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color],['0 ', reset_color]]]
+    all.seek(0)
+    try: 
+        for f in range(10):
+            for c in range(5):
+                reg = pickle.load(all)
+                locales[f][c][0] = str(reg.id).ljust(2,' ')
+                if reg.estado == 'B':
+                    locales[f][c][1] = color_rojo
+    except EOFError: 
+        ...    
+    
+    print(locales)
+    col = 0
+    for f in range(10):
         print("+--+--+--+--+--+")
-        print("|"+str(locales[a])+"|"+str(locales[a+1])+"|"+str(locales[a+2])+"|"+str(locales[a+3])+"|"+str(locales[a+4])+"|")
-        a = a + 5     
+        print("|"+str(locales[f][col+0][1]+locales[f][col+0][0])+reset_color+
+              "|"+str(locales[f][col+1][1]+locales[f][col+1][0])+reset_color+
+              "|"+str(locales[f][col+2][1]+locales[f][col+2][0])+reset_color+
+              "|"+str(locales[f][col+3][1]+locales[f][col+3][0])+reset_color+
+              "|"+str(locales[f][col+4][1]+locales[f][col+4][0])+reset_color+
+              "|")
+         
     print("+--+--+--+--+--+")
+    print("próximamente se habilitará un mapa con los demás locales …")
             
 def gestionDeLocales(): 
     print('------------------------------------------------------------------------------')
@@ -356,17 +397,11 @@ def gestionDeLocales():
     while elecciongdl != 'e':  
         match elecciongdl:
             case 'a':
-                x = 'S'
-                while x == 'S':
-                    crearLocal()
-                    x = input("Si desea seguir cargando locales? [S/N] >> ").upper()
-                    while x not in ['S', 'N']:
-                        x = input("Respuesta inválida [S/N] ").upper()
+                crearLocal()
                 print("Redirigiendo al menu principal de administradores...")
                 elecciongdl = 'e'
             case 'b':
                 modificarLocal()
-                mostrarLocales()
             case 'c': 
                 eliminarLocal()
                 mostrarLocales()
@@ -505,29 +540,38 @@ def mostrarUsos():
         print('----------------------------------------------------------------------')    
 
 def crearLocal():
-    L = Local()
-    ingresarDatosLocal(L)
-    L.id = sacarUIdL()
-    L.estado = 'A'
-    all.seek(os.path.getsize(alf))
-    formateoL(L)
-    pickle.dump(L, all)
-    all.flush()
-    ordenarLocales()
-    mostrarLocales()
-
-def crearPromocion(idd):
+    global creo
+    print("Creación de local: (Ingrese '*' para salir)")
+    aux = True
+    while aux:
+        L = Local()
+        ingresarDatosLocal(L)
+        if L.nombre.strip() != '*':    
+            L.id = sacarUIdL()
+            L.estado = 'A'
+            all.seek(os.path.getsize(alf))
+            formateoL(L)
+            pickle.dump(L, all)
+            all.flush()
+            ordenarLocales()
+            mostrarLocales()
+        else: aux = False
+        
+def crearPromocion(idd, creoo):
+    print("Creación de promoción: ")
     P = Promocion()
-    ingresarDatosPromo(P,idd)
-    P.id = sacarUIdP()
-    P.estado = 'Pendiente'
-    P.codD = idd
-    apl.seek(os.path.getsize(apf))
-    formateoP(P)
-    print(P.codLocal)
-    pickle.dump(P, apl)
-    apl.flush()
-
+    aux = ingresarDatosPromo(P,idd)
+    while aux:
+        P.id = sacarUIdP()
+        P.estado = 'Pendiente'
+        P.codD = idd
+        apl.seek(os.path.getsize(apf))
+        formateoP(P)
+        pickle.dump(P, apl)
+        apl.flush()
+        creoo += 1
+        aux = ingresarDatosPromo(P,idd)
+    
 def reporteUsoDesc(idd):
     aupl.seek(0)
     print('Desde: ')
@@ -583,84 +627,16 @@ def reporteUsoDesc(idd):
         print('---------------------------------------------------------------------')   
                
 def modificarLocal():
-    cod = input('Código del local a modificar: ')
-    while busqLC(cod) == -1:
-        cod = input('Intente de nuevo: ')
-    tamArc, tamReg, cantR = sacarCant(alf, all)
-    all.seek(busqLC(cod)-tamReg)
-    reg = pickle.load(all)
-    print('---------------------------------------------------------------------------------------------')
-    all.seek(0)
-    encabezado = ''
-    encabezado += '{:<20}'.format('1- Nombre')
-    encabezado += '{:<20}'.format('2- Ubicación')
-    encabezado += '{:<17}'.format('3- Rubro')
-    encabezado += '{:<15}'.format('4- Código de dueño')
-    print(encabezado)
-    print('-----------------------------------------------------------------------------------')
-    salida = ''
-    salida += '{:<20}'.format(reg.nombre.strip())
-    salida += '{:<20}'.format(reg.ubicacion.strip())
-    salida += '{:<17}'.format(reg.rubro.strip())
-    salida += '{:<15}'.format(str(reg.codigo).strip())
-    print(salida)
-    print('-----------------------------------------------------------------------------------')
-    campo = input('Seleccione campo a modificar: ')
-    while valEntero(campo, 1, 5):
-        campo = input('Campo inválido, intente de nuevo: ')
-    campo = int(campo)
-    match campo:
-        case 1:
-            print('Previo campo: '+reg.nombre)
-            reg.nombre = input('>> ')
-            
-        case 2:
-            print('Previo campo: '+reg.ubicacion)
-            reg.ubicacion = input('>> ')         
-        case 3:
-            print('Previo campo: '+reg.rubro)
-                
-            print('''
-            a- Indumentaria.
-            b- Perfumería.
-            c- Gastronomía.
-            ''')
-            rubro = input('Ingrese rubro de local (a/b/c): ').lower()
-            while rubro != 'a' and rubro != 'b' and rubro != 'c':
-                rubro = input('Selección no válida, intente de nuevo: ').lower()                  
-            match rubro:
-                case "a":
-                    reg.rubro = "Indumentaria"
-                case "b":
-                    reg.rubro = "Perfumeria"
-                case "c":
-                    reg.rubro = "Gastronomia"
-        case 4:
-            print('Previo campo: '+reg.codigo)
-            codigo = input('>> ')
-            while valEntero(codigo, 1, 100000) or busqD(codigo):
-                codigo = input("Intente de nuevo: ")
-            reg.codigo = int(codigo)            
-
-    all.seek(busqLC(cod)-tamReg)
-    formateoL(reg)
-    pickle.dump(reg, all)
-    all.flush()
-    ordenarLocales()
     mostrarLocales()
-       
-def eliminarLocal():
-    cod = input('Código del local a eliminar: ')
-    while busqLC(cod) == -1:
-        cod = input('Intente de nuevo: ')
-    tamArc, tamReg, cantR = sacarCant(alf, all)
-    all.seek(busqLC(cod)-tamReg)
-    reg = pickle.load(all)
-    if reg.estado == 'B':
-        print(reg.nombre.strip(), 'ya está dado de baja.')
-    else:
-        print('Desea confirmar la baja del local? ')
+    cod = input('Código del local a modificar (ingrese 0 para salir de opción): ')
+    if cod != '0':
+        while busqLC(cod) == -1:
+            cod = input('Intente de nuevo: ')
+        tamArc, tamReg, cantR = sacarCant(alf, all)
+        all.seek(busqLC(cod)-tamReg)
+        reg = pickle.load(all)
         print('---------------------------------------------------------------------------------------------')
+        all.seek(0)
         encabezado = ''
         encabezado += '{:<20}'.format('1- Nombre')
         encabezado += '{:<20}'.format('2- Ubicación')
@@ -674,15 +650,87 @@ def eliminarLocal():
         salida += '{:<17}'.format(reg.rubro.strip())
         salida += '{:<15}'.format(str(reg.codigo).strip())
         print(salida)
-        conf = input('[S/N]? ').lower()
-        while conf not in ['s', 'n']:
-            conf = input('Respuesta inválida, intente de nuevo: ').lower()
-        if conf == 's':
-            reg.estado = 'B'       
+        print('-----------------------------------------------------------------------------------')
+        campo = input('Seleccione campo a modificar: ')
+        while valEntero(campo, 1, 5):
+            campo = input('Campo inválido, intente de nuevo: ')
+        campo = int(campo)
+        match campo:
+            case 1:
+                print('Previo campo: '+reg.nombre)
+                reg.nombre = input('>> ')
+                
+            case 2:
+                print('Previo campo: '+reg.ubicacion)
+                reg.ubicacion = input('>> ')         
+            case 3:
+                print('Previo campo: '+reg.rubro)
+                    
+                print('''
+                a- Indumentaria.
+                b- Perfumería.
+                c- Gastronomía.
+                ''')
+                rubro = input('Ingrese rubro de local (a/b/c): ').lower()
+                while rubro != 'a' and rubro != 'b' and rubro != 'c':
+                    rubro = input('Selección no válida, intente de nuevo: ').lower()                  
+                match rubro:
+                    case "a":
+                        reg.rubro = "Indumentaria"
+                    case "b":
+                        reg.rubro = "Perfumeria"
+                    case "c":
+                        reg.rubro = "Gastronomia"
+            case 4:
+                print('Previo campo: '+reg.codigo)
+                codigo = input('>> ')
+                while valEntero(codigo, 1, 100000) or busqD(codigo):
+                    codigo = input("Intente de nuevo: ")
+                reg.codigo = int(codigo)            
+
         all.seek(busqLC(cod)-tamReg)
         formateoL(reg)
         pickle.dump(reg, all)
         all.flush()
+        ordenarLocales()
+        mostrarLocales()
+       
+def eliminarLocal():
+    mostrarLocales()
+    cod = input('Código del local a eliminar (ingrese 0 para salir de opción): ')
+    if cod != '0':
+        while busqLC(cod) == -1:
+            cod = input('Intente de nuevo: ')
+        tamArc, tamReg, cantR = sacarCant(alf, all)
+        all.seek(busqLC(cod)-tamReg)
+        reg = pickle.load(all)
+        if reg.estado == 'B':
+            print(reg.nombre.strip(), 'ya está dado de baja.')
+        else:
+            print('Desea confirmar la baja del local? ')
+            print('---------------------------------------------------------------------------------------------')
+            encabezado = ''
+            encabezado += '{:<20}'.format('1- Nombre')
+            encabezado += '{:<20}'.format('2- Ubicación')
+            encabezado += '{:<17}'.format('3- Rubro')
+            encabezado += '{:<15}'.format('4- Código de dueño')
+            print(encabezado)
+            print('-----------------------------------------------------------------------------------')
+            salida = ''
+            salida += '{:<20}'.format(reg.nombre.strip())
+            salida += '{:<20}'.format(reg.ubicacion.strip())
+            salida += '{:<17}'.format(reg.rubro.strip())
+            salida += '{:<15}'.format(str(reg.codigo).strip())
+            print(salida)
+            conf = input('[S/N]? ').lower()
+            while conf not in ['s', 'n']:
+                conf = input('Respuesta inválida, intente de nuevo: ').lower()
+            if conf == 's':
+                reg.estado = 'B'       
+            all.seek(busqLC(cod)-tamReg)
+            formateoL(reg)
+            pickle.dump(reg, all)
+            all.flush()
 
 def sacarCant(fis, log):
     if os.path.getsize(fis) > 0:
@@ -743,85 +791,99 @@ def sacarLocales(idd):
     return r
 
 def ingresarDatos(x):
+    global salir
     x.usuario = input('Ingrese mail de usuario: ')
     while len(x.usuario) > 100:
         print('Debe de ser un usuario de máximo 100 caracteres. Ingrese de nuevo: ')
         x.usuario = input('>>  ')
-        
+
+    while valMail(x.usuario):
+        print('Debe de ser una dirección de email. Ingrese de nuevo: ')
+        x.usuario = input('>>  ')
+    
     x.clave = getpass.getpass(prompt='Ingrese clave de usuario: ')
     while len(x.clave) > 8:
         print('Debe de ser una clave de máximo 8 caracteres. Ingrese de nuevo: ')
         x.clave = getpass.getpass(prompt='Ingrese clave de usuario: ')
         
-    x.usuario = x.usuario.ljust(100, ' ')
-    x.clave = x.clave.ljust(8, ' ')
-    
+    if x.usuario == '*' or x.clave == '*':
+        salir = True
+    else:
+        x.usuario = x.usuario.ljust(100, ' ')
+        x.clave = x.clave.ljust(8, ' ')
+ 
 def ingresarDatosLocal(x):
-    x.nombre = input('Ingrese nombre de local: ').ljust(50, ' ')
-    while len(x.nombre) > 50 or busqLN(x.nombre) != -1:
-        if len(x.nombre) > 50:
-            print('Debe de ser un nombre de local de máximo 50 caracteres. Ingrese de nuevo: ')
-        else:
-            print('Nombre de local existente. Ingrese con otro nombre: ')
-        x.nombre = input('>>  ').ljust(50, ' ')
+    x.nombre = input("Ingrese nombre de local (Ingrese '*' para salir): ").ljust(50, ' ')
+    if x.nombre.strip() != '*':
+        while len(x.nombre) > 50 or busqLN(x.nombre) != -1:
+            if len(x.nombre) > 50:
+                print("Debe de ser un nombre de local de máximo 50 caracteres. Ingrese de nuevo: (Ingrese '*' para salir)")
+            else:
+                print('Nombre de local existente. Ingrese con otro nombre: ')
+            x.nombre = input('>>  ').ljust(50, ' ')
 
-    x.ubicacion = input('Ingrese ubicacion de local: ').ljust(50, ' ')
-    while len(x.ubicacion) > 50:
-        print('Debe de ser una ubicacion de local de máximo 50 caracteres. Ingrese de nuevo: ')
-        x.ubicacion = input('>>  ').ljust(50, ' ')
-    
-    print('''
-        a- Indumentaria.
-        b- Perfumería.
-        c- Gastronomía.
-        ''')
-    x.rubro = input('Ingrese rubro de local (a/b/c): ').lower()
-    while x.rubro != 'a' and x.rubro != 'b' and x.rubro != 'c':
-        print('Selección no válida.')
-        x.rubro = input("Seleccione a que rubro pertenece el local: ").lower()                  
-    match x.rubro:
-        case "a":
-            x.rubro = "Indumentaria"
-        case "b":
-            x.rubro = "Perfumeria"
-        case "c":
-            x.rubro = "Gastronomia"
-    
-    x.codigo = input("Ingrese el código del dueño del local: ")
-    while valEntero(x.codigo, 1, 100000) or busqD(x.codigo):
-        x.codigo = input("Intente de nuevo: ")
-          
-    x.codigo = int(x.codigo)            
+        x.ubicacion = input('Ingrese ubicacion de local: ').ljust(50, ' ')
+        while len(x.ubicacion) > 50:
+            print('Debe de ser una ubicacion de local de máximo 50 caracteres. Ingrese de nuevo: ')
+            x.ubicacion = input('>>  ').ljust(50, ' ')
+        
+        print('''
+            a- Indumentaria.
+            b- Perfumería.
+            c- Gastronomía.
+            ''')
+        x.rubro = input('Ingrese rubro de local (a/b/c): ').lower()
+        while x.rubro != 'a' and x.rubro != 'b' and x.rubro != 'c':
+            print('Selección no válida.')
+            x.rubro = input("Seleccione a que rubro pertenece el local: ").lower()                  
+        match x.rubro:
+            case "a":
+                x.rubro = "Indumentaria"
+            case "b":
+                x.rubro = "Perfumeria"
+            case "c":
+                x.rubro = "Gastronomia"
+        
+        x.codigo = input("Ingrese el código del dueño del local: ")
+        while valEntero(x.codigo, 1, 100000) or busqD(x.codigo):
+            x.codigo = input("Intente de nuevo: ")
+            
+        x.codigo = int(x.codigo)            
        
 def ingresarDatosPromo(x, y):
-    x.desc = input('Ingrese la descripción de la promoción a agregar: ')
-    print('Desde: ')
-    desde = validarFecha()
-    print('Hasta: ')
-    hasta = validarFecha()   
-    while desde > hasta or desde < datetime.date.today():
-        print('Fechas inválidas:')
+    x.codLocal = input("Código del local al que será aplicada la promoción (ingrese 0 para salir): ")
+    while valLC(x.codLocal, y) == -1 and x.codLocal != '0':
+        x.codLocal = input('Código del local inválido, intente de nuevo: ')
+    
+    if x.codLocal != '0':        
+        x.desc = input("Ingrese la descripción de la promoción a agregar: ")
         print('Desde: ')
         desde = validarFecha()
         print('Hasta: ')
-        hasta = validarFecha()    
-    x.desde = str(desde)
-    x.hasta = str(hasta)
+        hasta = validarFecha()   
+        while desde > hasta or desde < datetime.date.today():
+            print('Fechas inválidas:')
+            print('Desde: ')
+            desde = validarFecha()
+            print('Hasta: ')
+            hasta = validarFecha()    
+        x.desde = str(desde)
+        x.hasta = str(hasta)
+        
+        dias = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+        for i in dias:
+            msj = str(i)+ '? 0: No, 1: Si >> '
+            conf = input(str(msj))
+            while valEntero(conf, 0, 1):
+                msjj = 'Respuesta inválida, '+msj
+                conf = input(msjj)
+            conf = int(conf)
+            x.diadesemana += str(conf)
     
-    dias = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
-    for i in dias:
-        msj = str(i)+ '? 0: No, 1: Si >> '
-        conf = input(str(msj))
-        while valEntero(conf, 0, 1):
-            msjj = 'Respeusta inválida, '+msj
-            conf = input(msjj)
-        conf = int(conf)
-        x.diadesemana += str(conf)
-    
-    x.codLocal = input('Código del local al que será aplicada la promoción: ')
-    while valLC(x.codLocal, y) == -1:
-        x.codLocal = input('Código del local inválido, intente de nuevo: ')
-    
+    if x.codLocal == '0':
+        return False
+    else: return True
+
 def busqCli(x,y, fis, log, modo):
     tamArc = os.path.getsize(fis)
     log.seek(0)
@@ -889,8 +951,8 @@ def busqLC(x):
        return aux
 
 def valLC(cod, idd):
+    aux = -1
     try:
-        aux = -1
         idd = int(idd)
         cod = int(cod)
         tamArc = os.path.getsize(alf)
@@ -1095,7 +1157,7 @@ def solicitarDesc(p):
     anodesde, mesdesde, diadesde, anohasta, meshasta, diahasta = int(anodesde), int(mesdesde), int(diadesde), int(anohasta), int(meshasta), int(diahasta)
     regdesde = datetime.date(anodesde, mesdesde, diadesde)
     reghasta = datetime.date(anohasta, meshasta, diahasta)
-    hoy = datetime.today()
+    hoy = datetime.date.today()
     if hoy >= regdesde and hoy <= reghasta and promo.estado.strip() == 'Aprobada':
         Up = UsoPromo()
         Up.codCli = p
@@ -1111,29 +1173,19 @@ def solicitarDesc(p):
     elif promo.estado.strip() != 'Aprobada': 
         print('Promoción no aprobada en el momento.')
         
+def valMail(mail):
+    if re.match('[^@]+@[^@]+\.[^@]+', mail):
+        return False
+    else:
+        return True
+        
 if os.path.getsize(auf) == 0:
     U = Usuario()
     U.codigo = 1
-    U.usuario = '1'.ljust(100, ' ')
-    U.clave = '1'.ljust(8, ' ')
+    U.usuario = 'admin@shopping.com'.ljust(100, ' ')
+    U.clave = '12345'.ljust(8, ' ')
     U.tipo = 'Administrador'
     aul.seek(0)
-    pickle.dump(U, aul)
-    aul.flush()
-    
-    U = Usuario()
-    U.codigo = 2
-    U.usuario = '2'.ljust(100, ' ')
-    U.clave = '2'.ljust(8, ' ')
-    U.tipo = 'Dueno'.ljust(13, ' ')
-    pickle.dump(U, aul)
-    aul.flush()
-    
-    U = Usuario()
-    U.codigo = 3
-    U.usuario = '3'.ljust(100, ' ')
-    U.clave = '3'.ljust(8, ' ')
-    U.tipo = 'Dueno'.ljust(13, ' ')
     pickle.dump(U, aul)
     aul.flush()
 
