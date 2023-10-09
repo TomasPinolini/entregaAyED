@@ -77,6 +77,10 @@ if not os.path.exists(auf):
 else:
     aul = open(auf, 'r+b')
 
+if not os.path.exists(aruf):
+    arul = open(aruf, 'w+b')
+else:
+    arul = open(aruf, 'r+b')
 
 def primerMenu():
     eleccionpm = -1
@@ -1196,3 +1200,4 @@ all.close()
 aul.close()
 apl.close()
 aupl.close()
+arul.close()
