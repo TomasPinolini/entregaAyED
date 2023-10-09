@@ -40,21 +40,11 @@ class UsoPromo():
         self.codPromo = 0
         self.hoy = ''
 
-class reporteUso():
-    def __init__(self):
-        self.id = 0
-        self.desc = ''
-        self.desde = ''
-        self.hasta = ''
-        self.diadesemana =''
-        self.estado = ''
-        self.cantUsos = 0
 
 auf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\USUARIOS.dat"
 alf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\LOCALES.dat"
 apf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\PROMOCIONES.dat"
 aupf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\USO.dat"
-aruf = r"C:\Users\tomas\OneDrive\Desktop\UTN\Algoritmos\proyecto-ayed-2023-git\REPORTEUSO.dat"
 
 
 if not os.path.exists(aupf):
@@ -77,10 +67,6 @@ if not os.path.exists(auf):
 else:
     aul = open(auf, 'r+b')
 
-if not os.path.exists(aruf):
-    arul = open(aruf, 'w+b')
-else:
-    arul = open(aruf, 'r+b')
 
 def primerMenu():
     eleccionpm = -1
